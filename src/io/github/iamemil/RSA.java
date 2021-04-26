@@ -1,6 +1,6 @@
 package io.github.iamemil;
 
-import java.math.BigInteger;
+import java.math.*;
 import java.util.*;
 
 public class RSA {
@@ -69,5 +69,21 @@ public class RSA {
         result.add(xPrev);
         result.add(yPrev);
         return result;
+    }
+
+    public boolean MillerRabinPrimalityTest(BigInteger p, BigInteger a) throws Exception {
+        if(p.compareTo(BigInteger.valueOf(3))<0){
+            throw new Exception("p should be greater than 3");
+        }
+        if(p.mod(BigInteger.valueOf(2)).equals(BigInteger.ZERO)){
+            throw new Exception("p should be odd");
+        }
+        if(!ExtEuclideanAlgo(p,a).get(0).equals(BigInteger.valueOf(1)))
+        {
+            throw new Exception("gcd("+p+","+a+") should be 1");
+        }
+        //BigInteger pTemp = p;
+        //p=p.subtract(BigInteger.ONE);
+        return true;
     }
 }

@@ -17,5 +17,6 @@ public class Main {
         //System.out.println(rsa.FastModExpo(a,b,m));
         System.out.println(rsa.FastModExpo(BigInteger.valueOf(6),BigInteger.valueOf(73),BigInteger.valueOf(100)));
         System.out.println(rsa.ExtEuclideanAlgo(BigInteger.valueOf(402),BigInteger.valueOf(123)));
+        System.out.println(rsa.MillerRabinPrimalityTest(BigInteger.valueOf(51),BigInteger.valueOf(2)));
     }
 }

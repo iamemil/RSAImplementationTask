@@ -72,22 +72,27 @@ public class RSA {
     }
 
     public boolean MillerRabinPrimalityTest(BigInteger p, BigInteger a) throws Exception {
+        if(p==null){
+            throw new Exception("p should be present");
+        }
+        if(a==null){
+            throw new Exception("a should be present");
+        }
+        // false - composite, true - possibly prime
         if(p.compareTo(BigInteger.valueOf(3))<0){
             throw new Exception("p should be greater than 3");
         }
         if(p.mod(BigInteger.valueOf(2)).equals(BigInteger.ZERO)){
             throw new Exception("p should be odd");
         }
-
+        if(!(a.compareTo(BigInteger.valueOf(1))>0 && a.compareTo(p)<0)){
+            throw new Exception("a should be in between 2<=a<p");
+        }
         if(!ExtEuclideanAlgo(p,a).get(0).equals(BigInteger.valueOf(1)))
         {
-            // p is composite
             return false;
-            //throw new Exception("gcd("+p+","+a+") should be 1");
         }
-        BigInteger pTemp = p;
-
-        pTemp=pTemp.subtract(BigInteger.ONE);
+        BigInteger pTemp = p.subtract(BigInteger.ONE);
         boolean doWhile=true;
         int iterations=1;
         BigInteger d = BigInteger.ONE;
@@ -102,12 +107,10 @@ public class RSA {
             }
         }
 
-        //System.out.println("a^d mod p =1 ? "+a.modPow(d,p));
         if(a.modPow(d,p).equals(BigInteger.ONE)){
             return true;
         }else{
             for (int i=0; i<S;i++){
-                //System.out.println(i + " "+ d +" "+ a.modPow(d.multiply(BigInteger.valueOf((long) Math.pow(2,i))),p));
                 if(a.modPow(d.multiply(BigInteger.valueOf((long) Math.pow(2,i))),p).equals(p.subtract(BigInteger.ONE))){
                     return true;
                 }

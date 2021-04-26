@@ -1,7 +1,7 @@
 package io.github.iamemil;
 
 import java.math.BigInteger;
-import java.util.BitSet;
+import java.util.*;
 
 public class RSA {
 
@@ -27,5 +27,47 @@ public class RSA {
             }
         }
         return result.mod(m);
+    }
+
+    public List<BigInteger> ExtEuclideanAlgo(BigInteger a, BigInteger b) throws Exception{
+        List<BigInteger> result = new ArrayList<BigInteger>();
+        result.add(b);
+        result.add(BigInteger.ZERO);
+        result.add(BigInteger.ONE);
+        if(a==null){
+            throw new Exception("a should be present");
+        }
+        if(b==null){
+            throw new Exception("b should be present");
+        }
+        if(a.equals(BigInteger.valueOf(0))){
+            return result;
+        }
+        result.clear();
+
+        BigInteger xPrev = BigInteger.valueOf(1);
+        BigInteger yPrev = BigInteger.valueOf(0);
+        BigInteger xCurr = BigInteger.valueOf(0);
+        BigInteger yCurr = BigInteger.valueOf(1);
+
+        while(!b.equals(BigInteger.valueOf(0))){
+            BigInteger bTmp = a.divide(b);
+            BigInteger newB = a.mod(b);
+            a=b;
+            b=newB;
+
+            BigInteger xNewCoeff = xPrev.subtract(bTmp.multiply(xCurr));
+            BigInteger yNewCoeff = yPrev.subtract(bTmp.multiply(yCurr));
+
+            xPrev = xCurr;
+            yPrev = yCurr;
+            xCurr = xNewCoeff;
+            yCurr = yNewCoeff;
+        }
+
+        result.add(a);
+        result.add(xPrev);
+        result.add(yPrev);
+        return result;
     }
 }

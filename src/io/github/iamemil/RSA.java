@@ -33,7 +33,7 @@ public class RSA {
     public BigInteger getRandomPrimeBigInt(int numofBits){
 
         BigInteger newNum = getRandomBigInt(numofBits);
-        while(MultiMillerRabinPrimalityTest(newNum,10)==false){
+        while(MultiMillerRabinPrimalityTest(newNum,3)==false){
             newNum = getRandomBigInt(numofBits);
         }
         return newNum;
@@ -120,11 +120,10 @@ public class RSA {
                 doWhile=false;
             }
         }
-        //if(FastModExpo(a.modPow(BigInteger.valueOf(2),p),d,p).modPow(d,p).equals(BigInteger.ONE)){
-            //return true;
-
+        //if(FastModExpo(a.modPow(BigInteger.valueOf(1),p),d,p).modPow(d,p).equals(BigInteger.ONE)){
+        //    return true;
         if(FastModExpo(a,d,p).equals(BigInteger.ONE)){
-             return true;
+            return true;
         }else{
             for (int i=1; i<S;i++){
                if(FastModExpo(a.modPow(BigInteger.valueOf(2).pow(i),p),d,p).equals(p.subtract(BigInteger.ONE))){

@@ -3,17 +3,17 @@ package io.github.iamemil;
 import io.github.iamemil.RSA;
 
 import java.math.BigInteger;
-import java.util.Random;
+import java.util.*;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
 	// write your code here
         RSA rsa = new RSA();
-        Random random = new Random();
-        BigInteger a = rsa.getRandomBigInt(512);
+        //Random random = new Random();
+        //BigInteger a = rsa.getRandomBigInt(512);
         BigInteger b = rsa.getRandomBigInt(1024);
-        BigInteger m = rsa.getRandomBigInt(512);
+        //BigInteger m = rsa.getRandomBigInt(512);
         //System.out.println("a: "+a);
         //System.out.println("b: "+b);
         //System.out.println("\n\n\n\n");
@@ -31,12 +31,23 @@ public class Main {
         BigInteger fmeResult = rsa.DecryptUsingFME(enResult);
         BigInteger crtResult = rsa.DecryptUsingCRT(enResult);
         //for (int i=0;i<10;i++){
-            //System.out.println(test+" is encrypted as "+rsa.Encrypt(test));
-            //System.out.println(enResult+" is decrypted as "+fmeResult);
+            System.out.println(test+" is encrypted as "+rsa.Encrypt(test));
+            System.out.println(enResult+" is decrypted as "+fmeResult);
             System.out.println(test.equals(fmeResult));
-            //System.out.println(enResult+ " is decrypted CRT as "+crtResult);
+            System.out.println(enResult+ " is decrypted using CRT as "+crtResult);
             System.out.println(test.equals(crtResult));
 System.out.println("==============================");
+        String testmsg = "Emil";
+        List<BigInteger> testMsgResult =rsa.EncryptString(testmsg);
+        String fmeMsgResult = rsa.DecryptStringUsingFME(testMsgResult);
+        String crtMsgResult = rsa.DecryptStringUsingCRT(testMsgResult);
+        //for (int i=0;i<10;i++){
+        System.out.println(testmsg+" is encrypted as "+testMsgResult);
+        System.out.println(testMsgResult+" is decrypted as "+fmeMsgResult);
+        //System.out.println(test.equals(fmeResult));
+        System.out.println(testMsgResult+ " is decrypted using CRT as "+crtMsgResult);
+        //System.out.println(test.equals(crtResult));
+        System.out.println("==============================");
         //}
        //System.out.println(rsa.FastModExpo(BigInteger.valueOf(911),BigInteger.valueOf(541),BigInteger.valueOf(691)));
         //System.out.println(rsa.ExtEuclideanAlgo(BigInteger.valueOf(37),BigInteger.valueOf(27)));

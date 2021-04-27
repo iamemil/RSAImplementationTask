@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RSA {
-    private int bitSize = 1025;
+    private int bitSize = 1024;
     private BigInteger p;
     private BigInteger q;
 
@@ -54,7 +54,7 @@ public class RSA {
         result = BigInteger.ONE;
         for (Map.Entry<BigInteger, Character> entry: res.entrySet()){
             if(entry.getValue()=='1'){
-                result = result.multiply(entry.getKey().mod(m));
+                result = result.multiply(entry.getKey().mod(m)).mod(m);
             }
         }
         res.clear();
@@ -179,8 +179,29 @@ public class RSA {
         return FastModExpo(data,this.publicKey[1],this.publicKey[0]);
     }
 
+    public List<BigInteger> EncryptString(String message){
+        List<BigInteger> encryptedMessage = new ArrayList<BigInteger>();
+        for (int i =0; i<message.length();i++){
+            BigInteger messageChunk = Encrypt(BigInteger.valueOf(message.charAt(i)));
+            //BigInteger messageChunk = FastModExpo(BigInteger.valueOf(message.charAt(i)),this.publicKey[1],this.publicKey[0]);
+            encryptedMessage.add(messageChunk);
+        }
+        return encryptedMessage;
+    }
+
     public BigInteger DecryptUsingFME(BigInteger data){
         return FastModExpo(data,this.getPrivateKey(),this.getPublicKey()[0]);
+    }
+
+    public String DecryptStringUsingFME(List<BigInteger> encryptedMessage){
+       StringBuilder stringBuilder = new StringBuilder();
+       //String resultMsg="";
+
+       for (int i=0; i< encryptedMessage.size();i++){
+           BigInteger msg = DecryptUsingFME(encryptedMessage.get(i));
+           stringBuilder.append((char)msg.intValue());
+       }
+       return stringBuilder.toString();
     }
 
     public BigInteger DecryptUsingCRT(BigInteger data){
@@ -200,6 +221,17 @@ public class RSA {
         BigInteger m = ((mp.multiply(euclidean.get(2)).multiply(this.q)).add((mq.multiply(euclidean.get(1)).multiply(this.p)))).mod(this.publicKey[0]);
 
         return m;
+    }
+
+    public String DecryptStringUsingCRT(List<BigInteger> encryptedMessage){
+        StringBuilder stringBuilder = new StringBuilder();
+        //String resultMsg="";
+
+        for (int i=0; i< encryptedMessage.size();i++){
+            BigInteger msg = DecryptUsingCRT(encryptedMessage.get(i));
+            stringBuilder.append((char)msg.intValue());
+        }
+        return stringBuilder.toString();
     }
 
 

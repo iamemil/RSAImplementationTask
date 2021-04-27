@@ -6,12 +6,12 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RSA {
-    private int bitSize = 1024;
-    private BigInteger p;
-    private BigInteger q;
+    private final int bitSize =1024;
+    private static BigInteger p;
+    private static BigInteger q;
 
-    private BigInteger privateKey;
-    public BigInteger[] publicKey = new BigInteger[2];
+    private static BigInteger privateKey;
+    public static BigInteger[] publicKey = new BigInteger[2];
 
     public RSA(){
         GenerateKeys();
@@ -39,14 +39,23 @@ public class RSA {
         return newNum;
     }
 
+    public BigInteger getRandomBigIntInRange(int numofBits,BigInteger min, BigInteger max){
+        BigInteger x = getRandomBigInt(numofBits);
+        while(!(x.compareTo(min)==1 && x.compareTo(max)==-1)){
+            x = getRandomBigInt(numofBits);
+        }
+        return x;
+    }
+
     public BigInteger FastModExpo(BigInteger a, BigInteger b, BigInteger m){
         if(b.compareTo(BigInteger.valueOf(1))<0){
+            // Error return -1
             return BigInteger.valueOf(-1);
         }
+        // Convert b to binary
         String temp = new StringBuilder(b.toString(2)).reverse().toString();
-        BigInteger result = a.mod(m);
-        Map<BigInteger,Character> res = new HashMap<BigInteger, Character>();
-        //System.out.println(temp);
+        BigInteger result = a;
+        Map<BigInteger,Character> res = new HashMap<>();
         for (int i=0;i<temp.length();i++) {
             res.put(result,temp.charAt(i));
             result = result.multiply(result).mod(m);
@@ -54,11 +63,11 @@ public class RSA {
         result = BigInteger.ONE;
         for (Map.Entry<BigInteger, Character> entry: res.entrySet()){
             if(entry.getValue()=='1'){
-                result = result.multiply(entry.getKey().mod(m)).mod(m);
+                result = result.multiply(entry.getKey()).mod(m);
             }
         }
         res.clear();
-        return result.mod(m);
+        return result;
     }
 
     public List<BigInteger> ExtEuclideanAlgo(BigInteger a, BigInteger b){
@@ -96,6 +105,7 @@ public class RSA {
         result.add(yPrev);
         return result;
     }
+
 
     public boolean SingleMillerRabinPrimalityTest(BigInteger p, BigInteger a) {
 
@@ -147,31 +157,16 @@ public class RSA {
         return true;
     }
 
-    public BigInteger getRandomBigIntInRange(int numofBits,BigInteger min, BigInteger max){
-
-        BigInteger x = getRandomBigInt(numofBits);
-        while(!(x.compareTo(min)==1 && x.compareTo(max)==-1)){
-            x = getRandomBigInt(numofBits);
-        }
-        return x;
-    }
-
     public void GenerateKeys(){
         this.p = getRandomPrimeBigInt(bitSize);
         this.q = getRandomPrimeBigInt(bitSize);
-        //p=BigInteger.valueOf(23);
-        //q = BigInteger.valueOf(11);
-        //System.out.println("p: "+p+"\nq: "+ q);
         BigInteger n = p.multiply(q);
-        //System.out.println("n: "+n);
         BigInteger phin = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
 
         BigInteger e = getRandomBigIntInRange(bitSize,BigInteger.ONE,phin);
         while(!(ExtEuclideanAlgo(e,phin).get(0).equals(BigInteger.valueOf(1)))){
             e = getRandomBigIntInRange(bitSize,BigInteger.ONE,phin);
         }
-        //e=BigInteger.valueOf(7);
-        //System.out.println("e: "+ e);
         this.privateKey = ExtEuclideanAlgo(phin,e).get(2).mod(phin);
         this.publicKey[0] = n;
         this.publicKey[1] = e;
@@ -197,7 +192,6 @@ public class RSA {
 
     public String DecryptStringUsingFME(List<BigInteger> encryptedMessage){
        StringBuilder stringBuilder = new StringBuilder();
-       //String resultMsg="";
 
        for (int i=0; i< encryptedMessage.size();i++){
            BigInteger msg = DecryptUsingFME(encryptedMessage.get(i));
@@ -208,26 +202,18 @@ public class RSA {
 
     public BigInteger DecryptUsingCRT(BigInteger data){
         BigInteger dp = this.privateKey.mod(p.subtract(BigInteger.ONE));
-        //System.out.println("dp: "+ dp);
         BigInteger dq = this.privateKey.mod(q.subtract(BigInteger.ONE));
-        //System.out.println("dq: "+ dq);
 
         BigInteger mp = data.modPow(dp,p);
-        //System.out.println("mp: "+ mp);
         BigInteger mq = data.modPow(dq,q);
-        //System.out.println("mq: "+ mq);
         List<BigInteger> euclidean = ExtEuclideanAlgo(p,q);
-        //System.out.println(euclidean);
-        //System.out.println(euclidean.get(2));
 
-        BigInteger m = ((mp.multiply(euclidean.get(2)).multiply(this.q)).add((mq.multiply(euclidean.get(1)).multiply(this.p)))).mod(this.publicKey[0]);
-
-        return m;
+        return ((mp.multiply(euclidean.get(2)).multiply(this.q)).add((mq.multiply(euclidean.get(1)).multiply(this.p)))).mod(this.publicKey[0]);
     }
+
 
     public String DecryptStringUsingCRT(List<BigInteger> encryptedMessage){
         StringBuilder stringBuilder = new StringBuilder();
-        //String resultMsg="";
 
         for (int i=0; i< encryptedMessage.size();i++){
             BigInteger msg = DecryptUsingCRT(encryptedMessage.get(i));

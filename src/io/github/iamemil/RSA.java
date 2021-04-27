@@ -168,7 +168,7 @@ public class RSA {
         while(!(ExtEuclideanAlgo(e,phin).get(0).equals(BigInteger.valueOf(1)))){
             e = getRandomBigIntInRange(bitSize,BigInteger.ONE,phin);
         }
-        e=BigInteger.valueOf(7);
+        //e=BigInteger.valueOf(7);
         //System.out.println("e: "+ e);
         this.privateKey = ExtEuclideanAlgo(phin,e).get(2).mod(phin);
         this.publicKey[0] = n;

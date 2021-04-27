@@ -136,9 +136,12 @@ public class RSA {
             return true;
         }else{
             for (int i=1; i<S;i++){
-               if(FastModExpo(a.modPow(BigInteger.valueOf(2).pow(i),p),d,p).equals(p.subtract(BigInteger.ONE))){
+               if(FastModExpo(FastModExpo(a,BigInteger.valueOf(2).pow(i),p),d,p).equals(p.subtract(BigInteger.ONE))){
                     return true;
                 }
+                //if(FastModExpo(a.modPow(BigInteger.valueOf(2).pow(i),p),d,p).equals(p.subtract(BigInteger.ONE))){
+                //    return true;
+                //}
             }
             return false;
         }
@@ -201,13 +204,16 @@ public class RSA {
     }
 
     public BigInteger DecryptUsingCRT(BigInteger data){
+        return ChineseRemTheory(data);
+    }
+
+    public BigInteger ChineseRemTheory(BigInteger c){
         BigInteger dp = this.privateKey.mod(p.subtract(BigInteger.ONE));
         BigInteger dq = this.privateKey.mod(q.subtract(BigInteger.ONE));
 
-        BigInteger mp = data.modPow(dp,p);
-        BigInteger mq = data.modPow(dq,q);
+        BigInteger mp = FastModExpo(c,dp,p);
+        BigInteger mq = FastModExpo(c,dq,q);
         List<BigInteger> euclidean = ExtEuclideanAlgo(p,q);
-
         return ((mp.multiply(euclidean.get(2)).multiply(this.q)).add((mq.multiply(euclidean.get(1)).multiply(this.p)))).mod(this.publicKey[0]);
     }
 

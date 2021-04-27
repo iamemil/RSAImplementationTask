@@ -7,8 +7,7 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-	// write your code here
+    public static void main(String[] args) {
         RSA rsa = new RSA();
         //Random random = new Random();
         //BigInteger a = rsa.getRandomBigInt(512);
@@ -30,25 +29,22 @@ public class Main {
         BigInteger enResult =rsa.Encrypt(test);
         BigInteger fmeResult = rsa.DecryptUsingFME(enResult);
         BigInteger crtResult = rsa.DecryptUsingCRT(enResult);
-        //for (int i=0;i<10;i++){
             System.out.println(test+" is encrypted as "+rsa.Encrypt(test));
             System.out.println(enResult+" is decrypted as "+fmeResult);
             System.out.println(test.equals(fmeResult));
             System.out.println(enResult+ " is decrypted using CRT as "+crtResult);
             System.out.println(test.equals(crtResult));
 System.out.println("==============================");
-        String testmsg = "Emil";
+        String testmsg = "the quick brown fox jumps over the lazy dog";
         List<BigInteger> testMsgResult =rsa.EncryptString(testmsg);
         String fmeMsgResult = rsa.DecryptStringUsingFME(testMsgResult);
         String crtMsgResult = rsa.DecryptStringUsingCRT(testMsgResult);
-        //for (int i=0;i<10;i++){
         System.out.println(testmsg+" is encrypted as "+testMsgResult);
         System.out.println(testMsgResult+" is decrypted as "+fmeMsgResult);
-        //System.out.println(test.equals(fmeResult));
+        System.out.println(testmsg.equals(fmeMsgResult));
         System.out.println(testMsgResult+ " is decrypted using CRT as "+crtMsgResult);
-        //System.out.println(test.equals(crtResult));
+        System.out.println(testmsg.equals(crtMsgResult));
         System.out.println("==============================");
-        //}
        //System.out.println(rsa.FastModExpo(BigInteger.valueOf(911),BigInteger.valueOf(541),BigInteger.valueOf(691)));
         //System.out.println(rsa.ExtEuclideanAlgo(BigInteger.valueOf(37),BigInteger.valueOf(27)));
         //System.out.println(rsa.MillerRabinPrimalityTest(BigInteger.valueOf(37),BigInteger.valueOf(27)));

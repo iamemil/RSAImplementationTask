@@ -1,45 +1,71 @@
 package io.github.iamemil;
 
+import java.lang.reflect.Array;
 import java.math.*;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class RSA {
+    private int bitSize = 10;
+    private BigInteger p;
+    private BigInteger q;
 
+    private BigInteger privateKey;
+    public BigInteger[] publicKey = new BigInteger[2];
 
-    public BigInteger FastModExpo(BigInteger a, BigInteger b, BigInteger m) throws Exception{
-        if(a==null){
-            throw new Exception("a should be present");
+    public RSA(){
+        GenerateKeys();
+    }
+
+    public BigInteger getPrivateKey(){
+        return this.privateKey;
+    }
+
+    public BigInteger[] getPublicKey(){
+        return this.publicKey;
+    }
+
+    public BigInteger getRandomBigInt(int numofBits){
+        Random random = new Random();
+        return new BigInteger(numofBits,random);
+    }
+
+    public BigInteger getRandomPrimeBigInt(int numofBits){
+
+        BigInteger newNum = getRandomBigInt(numofBits);
+        while(MultiMillerRabinPrimalityTest(newNum,10)==false){
+            newNum = getRandomBigInt(numofBits);
         }
-        if(b==null){
-            throw new Exception("b should be present");
-        }
-        if(m==null){
-            throw new Exception("m should be present");
-        }
+        return newNum;
+    }
+
+    public BigInteger FastModExpo(BigInteger a, BigInteger b, BigInteger m){
         if(b.compareTo(BigInteger.valueOf(1))<0){
-            throw new Exception("b should be bigger than 1");
+            return BigInteger.valueOf(-1);
         }
-        String temp = b.toString(2);
-        BigInteger result = BigInteger.ONE;
+        String temp = new StringBuilder(b.toString(2)).reverse().toString();
+        BigInteger result = a.mod(m);
+        Map<BigInteger,Character> res = new HashMap<BigInteger, Character>();
+        //System.out.println(temp);
         for (int i=0;i<temp.length();i++) {
-            if(temp.charAt(i)=='1'){
-                result = result.multiply((a.pow(2).pow(i)).mod(m));
+            res.put(result,temp.charAt(i));
+            result = result.multiply(result).mod(m);
+        }
+        result = BigInteger.ONE;
+        for (Map.Entry<BigInteger, Character> entry: res.entrySet()){
+            if(entry.getValue()=='1'){
+                result = result.multiply(entry.getKey().mod(m));
             }
         }
+        res.clear();
         return result.mod(m);
     }
 
-    public List<BigInteger> ExtEuclideanAlgo(BigInteger a, BigInteger b) throws Exception{
+    public List<BigInteger> ExtEuclideanAlgo(BigInteger a, BigInteger b){
         List<BigInteger> result = new ArrayList<BigInteger>();
         result.add(b);
         result.add(BigInteger.ZERO);
         result.add(BigInteger.ONE);
-        if(a==null){
-            throw new Exception("a should be present");
-        }
-        if(b==null){
-            throw new Exception("b should be present");
-        }
         if(a.equals(BigInteger.valueOf(0))){
             return result;
         }
@@ -71,25 +97,15 @@ public class RSA {
         return result;
     }
 
-    public boolean MillerRabinPrimalityTest(BigInteger p, BigInteger a) throws Exception {
-        if(p==null){
-            throw new Exception("p should be present");
-        }
-        if(a==null){
-            throw new Exception("a should be present");
-        }
-        // false - composite, true - possibly prime
-        if(p.compareTo(BigInteger.valueOf(3))<0){
-            throw new Exception("p should be greater than 3");
-        }
+    public boolean SingleMillerRabinPrimalityTest(BigInteger p, BigInteger a) {
+
         if(p.mod(BigInteger.valueOf(2)).equals(BigInteger.ZERO)){
-            throw new Exception("p should be odd");
+            return false;
+            //throw new Exception("p should be odd");
         }
-        if(!(a.compareTo(BigInteger.valueOf(1))>0 && a.compareTo(p)<0)){
-            throw new Exception("a should be in between 2<=a<p");
-        }
-        if(!ExtEuclideanAlgo(p,a).get(0).equals(BigInteger.valueOf(1)))
+        if(!(ExtEuclideanAlgo(p,a).get(0).equals(BigInteger.valueOf(1))))
         {
+            //System.out.println(ExtEuclideanAlgo(p,a).get(0).equals(BigInteger.valueOf(1)));
             return false;
         }
         BigInteger pTemp = p.subtract(BigInteger.ONE);
@@ -106,16 +122,83 @@ public class RSA {
                 doWhile=false;
             }
         }
-
-        if(a.modPow(d,p).equals(BigInteger.ONE)){
+        if(FastModExpo(a.modPow(BigInteger.valueOf(2),p),d,p).modPow(d,p).equals(BigInteger.ONE)){
             return true;
         }else{
-            for (int i=0; i<S;i++){
-                if(a.modPow(d.multiply(BigInteger.valueOf((long) Math.pow(2,i))),p).equals(p.subtract(BigInteger.ONE))){
+            for (int i=1; i<S;i++){
+               if(FastModExpo(a.modPow(BigInteger.valueOf(2).pow(i),p),d,p).equals(p.subtract(BigInteger.ONE))){
                     return true;
                 }
             }
             return false;
         }
     }
+
+    public boolean MultiMillerRabinPrimalityTest(BigInteger p, int round) {
+        for (int i=0;i<round;i++){
+            BigInteger a = getRandomBigInt(p.bitLength());
+            while(!(a.compareTo(BigInteger.valueOf(2))>=0 && a.compareTo(p)==-1)){
+                a = getRandomBigInt(p.bitLength());
+            }
+            if(SingleMillerRabinPrimalityTest(p,a)==false){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public BigInteger getRandomBigIntInRange(int numofBits,BigInteger min, BigInteger max){
+
+        BigInteger x = getRandomBigInt(numofBits);
+        while(!(x.compareTo(min)==1 && x.compareTo(max)==-1)){
+            x = getRandomBigInt(numofBits);
+        }
+        return x;
+    }
+
+    public void GenerateKeys(){
+        this.p = getRandomPrimeBigInt(bitSize);
+        this.q = getRandomPrimeBigInt(bitSize);
+        System.out.println(p+" "+ q);
+        BigInteger n = p.multiply(q);
+        BigInteger phin = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
+
+        BigInteger e = getRandomBigIntInRange(bitSize,BigInteger.ONE,phin);
+        while(!(ExtEuclideanAlgo(e,phin).get(0).equals(BigInteger.valueOf(1)))){
+            e = getRandomBigIntInRange(bitSize,BigInteger.ONE,phin);
+        }
+
+        this.privateKey = ExtEuclideanAlgo(phin,e).get(2).mod(phin);
+        this.publicKey[0] = n;
+        this.publicKey[1] = e;
+    }
+
+    public BigInteger Encrypt(BigInteger data){
+        return FastModExpo(data,this.publicKey[1],this.publicKey[0]);
+    }
+
+    public BigInteger DecryptUsingFME(BigInteger data){
+        return FastModExpo(data,this.getPrivateKey(),this.getPublicKey()[0]);
+    }
+
+    public BigInteger DecryptUsingCRT(BigInteger data){
+        BigInteger dp = this.privateKey.mod(p.subtract(BigInteger.ONE));
+        //System.out.println(dp);
+        BigInteger dq = this.privateKey.mod(q.subtract(BigInteger.ONE));
+        //System.out.println(dq);
+
+        BigInteger mp = data.modPow(dp,p);
+        //System.out.println(mp);
+        BigInteger mq = data.modPow(dq,q);
+        //System.out.println(mq);
+        List<BigInteger> euclidean = ExtEuclideanAlgo(mp,mq);
+        //System.out.println(euclidean.get(2));
+
+        BigInteger m = (this.publicKey[1].multiply(euclidean.get(1)).multiply(this.p).add(this.publicKey[1].multiply(euclidean.get(2)).multiply(this.q))).mod(this.publicKey[0]);
+
+        return m;
+    }
+
+
+
 }

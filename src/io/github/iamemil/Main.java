@@ -36,6 +36,11 @@ public class Main {
             System.out.println(test.equals(crtResult));
 System.out.println("==============================");
         String testmsg = "the quick brown fox jumps over the lazy dog";
+        //testmsg= "The students went to university";
+        //System.out.println("Enter your string: ");
+        //Scanner scan = new Scanner(System.in);
+        //testmsg = scan.nextLine();
+        //scan.close();
         List<BigInteger> testMsgResult =rsa.EncryptString(testmsg);
         String fmeMsgResult = rsa.DecryptStringUsingFME(testMsgResult);
         String crtMsgResult = rsa.DecryptStringUsingCRT(testMsgResult);

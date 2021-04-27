@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RSA {
-    private int bitSize = 10;
+    private int bitSize = 1025;
     private BigInteger p;
     private BigInteger q;
 
@@ -101,11 +101,9 @@ public class RSA {
 
         if(p.mod(BigInteger.valueOf(2)).equals(BigInteger.ZERO)){
             return false;
-            //throw new Exception("p should be odd");
         }
         if(!(ExtEuclideanAlgo(p,a).get(0).equals(BigInteger.valueOf(1))))
         {
-            //System.out.println(ExtEuclideanAlgo(p,a).get(0).equals(BigInteger.valueOf(1)));
             return false;
         }
         BigInteger pTemp = p.subtract(BigInteger.ONE);
@@ -159,15 +157,19 @@ public class RSA {
     public void GenerateKeys(){
         this.p = getRandomPrimeBigInt(bitSize);
         this.q = getRandomPrimeBigInt(bitSize);
-        System.out.println(p+" "+ q);
+        //p=BigInteger.valueOf(23);
+        //q = BigInteger.valueOf(11);
+        //System.out.println("p: "+p+"\nq: "+ q);
         BigInteger n = p.multiply(q);
+        //System.out.println("n: "+n);
         BigInteger phin = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
 
         BigInteger e = getRandomBigIntInRange(bitSize,BigInteger.ONE,phin);
         while(!(ExtEuclideanAlgo(e,phin).get(0).equals(BigInteger.valueOf(1)))){
             e = getRandomBigIntInRange(bitSize,BigInteger.ONE,phin);
         }
-
+        e=BigInteger.valueOf(7);
+        //System.out.println("e: "+ e);
         this.privateKey = ExtEuclideanAlgo(phin,e).get(2).mod(phin);
         this.publicKey[0] = n;
         this.publicKey[1] = e;
@@ -183,18 +185,19 @@ public class RSA {
 
     public BigInteger DecryptUsingCRT(BigInteger data){
         BigInteger dp = this.privateKey.mod(p.subtract(BigInteger.ONE));
-        //System.out.println(dp);
+        //System.out.println("dp: "+ dp);
         BigInteger dq = this.privateKey.mod(q.subtract(BigInteger.ONE));
-        //System.out.println(dq);
+        //System.out.println("dq: "+ dq);
 
         BigInteger mp = data.modPow(dp,p);
-        //System.out.println(mp);
+        //System.out.println("mp: "+ mp);
         BigInteger mq = data.modPow(dq,q);
-        //System.out.println(mq);
-        List<BigInteger> euclidean = ExtEuclideanAlgo(mp,mq);
+        //System.out.println("mq: "+ mq);
+        List<BigInteger> euclidean = ExtEuclideanAlgo(p,q);
+        //System.out.println(euclidean);
         //System.out.println(euclidean.get(2));
 
-        BigInteger m = (this.publicKey[1].multiply(euclidean.get(1)).multiply(this.p).add(this.publicKey[1].multiply(euclidean.get(2)).multiply(this.q))).mod(this.publicKey[0]);
+        BigInteger m = ((mp.multiply(euclidean.get(2)).multiply(this.q)).add((mq.multiply(euclidean.get(1)).multiply(this.p)))).mod(this.publicKey[0]);
 
         return m;
     }

@@ -54,12 +54,14 @@ public class RSA {
         }
         // Convert b to binary
         String temp = new StringBuilder(b.toString(2)).reverse().toString();
+        //Calculating values
         BigInteger result = a;
         Map<BigInteger,Character> res = new HashMap<>();
         for (int i=0;i<temp.length();i++) {
             res.put(result,temp.charAt(i));
             result = result.multiply(result).mod(m);
         }
+        //Determining final result
         result = BigInteger.ONE;
         for (Map.Entry<BigInteger, Character> entry: res.entrySet()){
             if(entry.getValue()=='1'){
@@ -79,7 +81,7 @@ public class RSA {
             return result;
         }
         result.clear();
-
+        //Setting values for x0,x1,y0,y1
         BigInteger xPrev = BigInteger.valueOf(1);
         BigInteger yPrev = BigInteger.valueOf(0);
         BigInteger xCurr = BigInteger.valueOf(0);
@@ -94,6 +96,7 @@ public class RSA {
             BigInteger xNewCoeff = xPrev.subtract(bTmp.multiply(xCurr));
             BigInteger yNewCoeff = yPrev.subtract(bTmp.multiply(yCurr));
 
+            //Swapping values
             xPrev = xCurr;
             yPrev = yCurr;
             xCurr = xNewCoeff;
@@ -130,8 +133,6 @@ public class RSA {
                 doWhile=false;
             }
         }
-        //if(FastModExpo(a.modPow(BigInteger.valueOf(1),p),d,p).modPow(d,p).equals(BigInteger.ONE)){
-        //    return true;
         if(FastModExpo(a,d,p).equals(BigInteger.ONE)){
             return true;
         }else{
@@ -139,9 +140,6 @@ public class RSA {
                if(FastModExpo(FastModExpo(a,BigInteger.valueOf(2).pow(i),p),d,p).equals(p.subtract(BigInteger.ONE))){
                     return true;
                 }
-                //if(FastModExpo(a.modPow(BigInteger.valueOf(2).pow(i),p),d,p).equals(p.subtract(BigInteger.ONE))){
-                //    return true;
-                //}
             }
             return false;
         }
@@ -183,7 +181,6 @@ public class RSA {
         List<BigInteger> encryptedMessage = new ArrayList<BigInteger>();
         for (int i =0; i<message.length();i++){
             BigInteger messageChunk = Encrypt(BigInteger.valueOf(message.charAt(i)));
-            //BigInteger messageChunk = FastModExpo(BigInteger.valueOf(message.charAt(i)),this.publicKey[1],this.publicKey[0]);
             encryptedMessage.add(messageChunk);
         }
         return encryptedMessage;
